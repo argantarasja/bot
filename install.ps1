@@ -1,19 +1,33 @@
 # ============================================================
-#   AUTO INSTALLER DEPENDENCIES BOT WA
+#   AUTO INSTALLER DEPENDENCIES BOT WA - WINDOWS
 #   Developer : Argantara
-#   Platform  : Windows 10/11
+#   Fixed & Updated
 # ============================================================
 
 Clear-Host
 
 Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host "        AUTO INSTALLER – BOT WHATSAPP DEPENDENCIES     " -ForegroundColor Cyan
+Write-Host "           AUTO INSTALLER – BOT DEPENDENCIES         " -ForegroundColor Cyan
 Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host "                   Developer: ARGANTARA" -ForegroundColor Yellow
+Write-Host "                     Developer: ARGANTARA" -ForegroundColor Yellow
 Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Loading Animation
+# ===== CHECK ADMIN RIGHTS =====
+If (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+    [Security.Principal.WindowsBuiltInRole] "Administrator"))
+{
+    Write-Host "❌ Please run PowerShell as *Administrator*!" -ForegroundColor Red
+    exit
+}
+
+# ===== CHECK WINGET =====
+if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Write-Host "❌ WINGET not found! Please update Microsoft Store first." -ForegroundColor Red
+    exit
+}
+
+# ===== Loading Animation =====
 function Show-Loading {
     $chars = "/-\|"
     for ($i=0; $i -lt 25; $i++) {
@@ -26,40 +40,32 @@ function Show-Loading {
 
 Show-Loading
 
-Write-Host "▶ Installing Node.js LTS..." -ForegroundColor Green
-winget install OpenJS.NodeJS.LTS -h --accept-package-agreements --accept-source-agreements
+# ===== Install via Winget with Safe Execution =====
+function Install-Package($name, $id) {
+    Write-Host "▶ Installing $name..." -ForegroundColor Green
+    winget install $id -h --accept-package-agreements --accept-source-agreements `
+        --silent --disable-interactivity | Out-Null
+}
 
-Write-Host "▶ Installing Git..." -ForegroundColor Green
-winget install Git.Git -h --accept-package-agreements --accept-source-agreements
+Install-Package "Node.js" "OpenJS.NodeJS.LTS"
+Install-Package "Git" "Git.Git"
+Install-Package "FFmpeg" "Gyan.FFmpeg"
+Install-Package "ImageMagick" "ImageMagick.ImageMagick"
+Install-Package "WebP Tools" "Google.WebP"
+Install-Package "Python 3" "Python.Python.3"
+Install-Package "SQLite" "SQLite.SQLite"
 
-Write-Host "▶ Installing FFmpeg..." -ForegroundColor Green
-winget install Gyan.FFmpeg -h --accept-package-agreements --accept-source-agreements
-
-Write-Host "▶ Installing ImageMagick..." -ForegroundColor Green
-winget install ImageMagick.ImageMagick -h --accept-package-agreements --accept-source-agreements
-
-Write-Host "▶ Installing WebP Tools..." -ForegroundColor Green
-winget install Google.WebP -h --accept-package-agreements --accept-source-agreements
-
-Write-Host "▶ Installing Python 3..." -ForegroundColor Green
-winget install Python.Python.3 -h --accept-package-agreements --accept-source-agreements
-
-Write-Host "▶ Installing Build Tools..." -ForegroundColor Green
-npm install --global --production windows-build-tools
-
+# ===== NPM DEPENDENCIES =====
 Write-Host "▶ Installing Yarn, PNPM, PM2..." -ForegroundColor Green
-npm install -g yarn pnpm pm2
+npm install -g yarn pnpm pm2 --force
 
-Write-Host "▶ Installing SQLite..." -ForegroundColor Green
-winget install SQLite.SQLite -h --accept-package-agreements --accept-source-agreements
-
+# ===== Optional MongoDB =====
 $mongo = Read-Host "Install MongoDB? (y/n)"
 if ($mongo -eq "y") {
-    Write-Host "▶ Installing MongoDB..." -ForegroundColor Green
-    winget install MongoDB.Server -h --accept-package-agreements --accept-source-agreements
+    Install-Package "MongoDB Server" "MongoDB.Server"
 }
 
 Write-Host ""
 Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host "  ✔ INSTALLATION COMPLETE — ARGANTARA DEV ✔" -ForegroundColor Green
+Write-Host "      ✔ INSTALLATION COMPLETE — ARGANTARA DEV ✔" -ForegroundColor Green
 Write-Host "=======================================================" -ForegroundColor Cyan
